@@ -1,0 +1,15 @@
+require(dplyr)
+library(zoo)
+#require(quantmod)
+#getwd()
+#---- wczytywanie
+KGHM <- read.csv('KGHM.csv', header = FALSE)
+names(KGHM) <- c('ticker', 'X0', 'date', 'time', 'O', 'H', 'L', 'C', 'volume', 'xxx')
+KGHM_Przed10 <- KGHM[KGHM$time < 100000 & KGHM$date >= 20130415,]
+KGHM_Po10 <- KGHM[KGHM$time >= 100000 & KGHM$date >= 20130415,]
+KGHM_Przed10[4] <- paste0("0", KGHM_Przed10$time)
+KGHM_pelnyTime <- rbind(KGHM_Przed10, KGHM_Po10)
+KGH_sort <- arrange(data.frame(date = as.POSIXct(paste(KGHM_pelnyTime$date, KGHM_pelnyTime$time),
+                              format = "%Y%m%d %H%M%S"),
+                              price = KGHM_pelnyTime$C, volume = KGHM_pelnyTime$volume), date)
+KGHzoo <- read.zoo(KGH_sort)
